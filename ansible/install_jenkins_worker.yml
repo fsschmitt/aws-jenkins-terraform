@@ -3,8 +3,9 @@
   become: yes
   remote_user: ec2-user
   become_user: root
-  tasks:
-    - name: install jq client
-      yum:
-        name: jq
-        state: present
+  roles:
+    - role: system/install_jenkins_worker
+  vars:
+    master_ip: "0.0.0.0" # THIS NEEDS TO BE SPECIFIED ON RUN
+  tags:
+    - system_install

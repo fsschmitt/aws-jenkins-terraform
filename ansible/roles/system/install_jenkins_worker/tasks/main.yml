@@ -1,0 +1,15 @@
+---
+- name: Generate SSH Keys for Jenkins
+  import_tasks: 01_generate_ssh_keys.yml
+
+- name: Create Jenkins config
+  import_tasks: 02_create_jenkins_config.yml
+
+- name: Install Jenkins dependencies
+  import_tasks: 03_install_dependencies.yml
+
+- name: Install Jenkins CLI
+  import_tasks: 04_install_jenkins_cli.yml
+
+- name: Register Jenkins as worker
+  import_tasks: 05_register_jenkins_worker.yml

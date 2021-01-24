@@ -1,0 +1,6 @@
+---
+- name: Install Jenkins dependencies
+  import_tasks: 01_install_dependencies.yml
+
+- name: Install Jenkins
+  import_tasks: 02_install_jenkins.yml

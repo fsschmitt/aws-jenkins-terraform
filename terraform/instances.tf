@@ -57,16 +57,28 @@ resource "aws_instance" "jenkins-worker" {
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.jenkins-worker-sg.id]
   subnet_id                   = aws_subnet.subnet_1_worker.id
+  provisioner "remote-exec" {
+    when = destroy
+    inline = [
+      "java -jar /home/ec2-user/jenkins-cli.jar -auth @/home/ec2-user/jenkins_auth -s http://${aws_instance.jenkins-master.private_ip}:8080 -auth @/home/ec2-user/jenkins_auth delete-node ${self.private_ip}"
+    ]
+    connection {
+      type        = "ssh"
+      user        = "ec2-user"
+      private_key = file("~/.ssh/id_rsa")
+      host        = self.public_ip
+    }
+  }
+
+  provisioner "local-exec" {
+    command = <<EOF
+aws ec2 wait instance-status-ok --region ${var.region-worker} --instance-ids ${self.id}
+ANSIBLE_CONFIG=../ansible/ansible.cfg ansible-playbook --extra-vars 'passed_in_hosts=tag_Name_${self.tags.Name} master_ip=${aws_instance.jenkins-master.private_ip}' ../ansible/install_jenkins_worker.yml
+EOF
+  }
 
   tags = {
     Name = join("_", ["jenkins_worker_tf", count.index + 1])
   }
   depends_on = [aws_main_route_table_association.set-worker-default-rt-assoc, aws_instance.jenkins-master]
-
-  provisioner "local-exec" {
-    command = <<EOF
-aws ec2 wait instance-status-ok --region ${var.region-worker} --instance-ids ${self.id}
-ANSIBLE_CONFIG=../ansible/ansible.cfg ansible-playbook --extra-vars 'passed_in_hosts=tag_Name_${self.tags.Name}' ../ansible/install_jenkins_worker.yml
-EOF
-  }
 }
