@@ -35,5 +35,5 @@ variable "webserver-port" {
 
 variable "dns-name" {
   type    = string
-  default = "cmcloudlab838.info." #example cmcloudlab1234.info.
+  default = "cmcloudlab564.info." # DYNAMIC_ROUTE53_HOSTEDZONE
 }
